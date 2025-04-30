@@ -46,9 +46,9 @@ class JsonObject(private val members: Map<String, JsonValue>) : JsonValue {
     //Operações filter
     // Criar uma função que recebe com um parametro
 
-    fun Map<String, JsonValue>.filter(): JsonObject {
-        members.filter()
-    }
+//    fun Map<String, JsonValue>.filter(): JsonObject {
+//        members.filter()
+//    }
 
     override fun toJson(): String {
         return members.entries.joinToString(prefix = "{", postfix = "}") { (key, value) ->
