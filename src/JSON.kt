@@ -42,13 +42,9 @@ interface JsonValue {
 
 class JsonObject(private val members: Map<String, JsonValue>) : JsonValue {
 
-
-    //Operações filter
-    // Criar uma função que recebe com um parametro
-
-//    fun Map<String, JsonValue>.filter(): JsonObject {
-//        members.filter()
-//    }
+    fun filter(predicate: (Map.Entry<String, JsonValue>) -> Boolean): JsonObject {
+        return JsonObject(members.filter(predicate))
+    }
 
     override fun toJson(): String {
         return members.entries.joinToString(prefix = "{", postfix = "}") { (key, value) ->
@@ -57,23 +53,36 @@ class JsonObject(private val members: Map<String, JsonValue>) : JsonValue {
     }
 }
 
+/**
+ * @constructor
+ * Criar um objecto do tipo JsonValue recebendo como parametro um objeto do tipo List, aceitando objetos JsonValue
+ */
 class JsonArray(private var value: List<JsonValue>) : JsonValue {
-    //Operações filter
 
-    //Operações mapping
+    fun filter(predicate: (JsonValue) -> Boolean): JsonArray {
+        return JsonArray(value.filter(predicate))
+    }
+
+    fun map(transform: (JsonValue) -> JsonValue): JsonArray {
+        return JsonArray(value.map(transform))
+    }
 
     override fun toJson(): String {
         return value.joinToString(prefix = "[", postfix = "]") { it.toJson() }
     }
 }
 
-// "Nome da variavel": "Value"
+/**
+ * @constructor
+ * Criar um objecto do tipo JsonValue recebendo como parametro um objeto do tipo String
+ */
 class JsonString(private var value: String) : JsonValue{
 
+    //Existe possibilidade de ser removido
     fun setValue(newValue: String){
         value = newValue
     }
-
+    //Existe possibilidade de ser removido
     fun getValueVariavel(): String{
         return value
     }
@@ -83,13 +92,16 @@ class JsonString(private var value: String) : JsonValue{
     }
 }
 
-// "Nome da variavel": Value
+/**
+ * @constructor
+ * Criar um objecto do tipo JsonValue recebendo como parametro um objeto do tipo Number
+ */
 class JsonNumber(private var value: Number) : JsonValue{
-
+    //Existe possibilidade de ser removido
     fun setValue(newValue: Number){
         value = newValue
     }
-
+    //Existe possibilidade de ser removido
     fun getValueVariavel(): Number{
         return value
     }
@@ -99,13 +111,16 @@ class JsonNumber(private var value: Number) : JsonValue{
     }
 }
 
-// "Nome da variavel": True/False
+/**
+ * @constructor
+ * Criar um objecto do tipo JsonValue recebendo como parametro um objeto do tipo boolean (True/False)
+ */
 class JsonBoolean(private var value: Boolean) : JsonValue{
-
+    //Existe possibilidade de ser removido
     fun setValue(newValue: Boolean){
         value = newValue
     }
-
+    //Existe possibilidade de ser removido
     fun getValueVariavel(): Boolean{
         return value
     }
@@ -115,7 +130,10 @@ class JsonBoolean(private var value: Boolean) : JsonValue{
     }
 }
 
-// "Nome da variavel": Null
+/**
+ * @constructor
+ * Criar um objecto do tipo JsonValue contendo este valor -> Null
+ */
 object JsonNull : JsonValue {
     override fun toJson(): String = "null"
 }
