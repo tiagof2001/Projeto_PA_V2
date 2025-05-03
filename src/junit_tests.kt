@@ -168,7 +168,7 @@ fun testVisitores(){
     val json = JsonObject(
         listOf(
             "nome" to JsonString("Alice"),
-            "numero" to JsonNumber(30),
+            "idade" to JsonNumber(30),
             "numero" to JsonArray(listOf(JsonNumber(1), JsonNumber(2), JsonNumber(3)))
         )
     )
