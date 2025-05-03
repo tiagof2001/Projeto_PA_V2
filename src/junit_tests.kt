@@ -191,6 +191,23 @@ fun testVisitores(){
 
 }
 
+@Test
+fun conversaoForJson(){
+    assertEquals(convertToJson("Alice").toJson(), JsonString("Alice").toJson())
+    assertEquals(convertToJson(true).toJson(), JsonBoolean(true).toJson())
+    assertEquals(convertToJson(10).toJson(), JsonNumber(10).toJson())
+
+    val testMap = mapOf<String, Any?>( "teste1" to 10, "teste2" to 20 )
+    val resultMap = listOf<Pair<String, JsonValue>>("teste1" to JsonNumber(10), "teste2" to JsonNumber(20))
+    assertEquals(convertToJson(testMap).toJson(),
+        JsonObject(resultMap).toJson()
+    )
+
+    val testList = listOf<Any?>(null,20)
+    val resultList = listOf<JsonValue>(JsonNull, JsonNumber(20))
+    assertEquals(convertToJson(testList).toJson(), JsonArray(resultList).toJson())
+}
+
 fun main() {
 
 //    intTojson()
@@ -202,7 +219,8 @@ fun main() {
 //    objectToJsonFiltring()
 //    arrayFilterTest()
 //    arrayMapTest()
-    testVisitores()
+//    testVisitores()
+    conversaoForJson()
 
 }
 
