@@ -8,7 +8,7 @@ class VisitorArrayElementsSameType : JsonVisitor {
     override fun visitorArray(array: JsonArray) {
         val elements = array.getValues().filter { it != JsonNull }
         if (elements.isNotEmpty()) {
-            isSameType = isSameType && elements.all { it::class == elements.first()::class }
+            isSameType = elements.all { it::class == elements.first()::class }
         }
 
         for (value in array.getValues()) {

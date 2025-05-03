@@ -6,8 +6,9 @@ class VisitorValidateKeys : JsonVisitor {
     var isValid = true
 
     override fun visitorObject(obj: JsonObject) {
-        val keys = obj.getMembers().keys
-        isValid = isValid && keys.all { it.isNotBlank() } && keys.size == keys.toSet().size
+        val keys = obj.getMembers().map { it.first }
+
+        isValid = keys.all { it.isNotBlank() } && keys.size == keys.toSet().size
 
         for ((_, value) in obj.getMembers()) {
             value.accept(this)

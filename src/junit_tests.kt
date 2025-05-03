@@ -99,7 +99,7 @@ assertEquals(jsonTest.toJson(), "[10, \"20\", true, false, null]")
 @Test
 fun objectTojson() {
 val person = JsonObject(
-    mapOf(
+    listOf(
         "name" to JsonString("Alice"),
         "age" to JsonNumber(30),
         "isStudent" to JsonBoolean(false),
@@ -121,7 +121,7 @@ assertEquals(person.toJson(),
 @Test
 fun objectToJsonFiltring() {
 val testjson = JsonObject(
-    mapOf(
+    listOf(
         "name" to JsonString("Alice"),
         "age" to JsonNumber(30),
         "isStudent" to JsonBoolean(true),
@@ -129,9 +129,9 @@ val testjson = JsonObject(
         "address" to JsonNull
     )
 )
-val filterName = testjson.filter { it.key == "name" }
+val filterName = testjson.filter { it.first == "name" }
 assertEquals(filterName.toJson(),"{" + "\"name\": \"Alice\"" + "}")
-val filterNumber = testjson.filter { it.value::class == JsonNumber::class }
+val filterNumber = testjson.filter { it.second::class == JsonNumber::class }
 assertEquals(filterNumber.toJson(),"{" + "\"age\": 30" + "}")
 }
 
@@ -166,10 +166,10 @@ assertEquals(mapped.toJson(), "[10, 20, 30]")
 
 fun testVisitores(){
     val json = JsonObject(
-        mapOf(
+        listOf(
             "nome" to JsonString("Alice"),
-            "idade" to JsonNumber(30),
-            "valores" to JsonArray(listOf(JsonNumber(1), JsonNumber(2), JsonNumber(3)))
+            "numero" to JsonNumber(30),
+            "numero" to JsonArray(listOf(JsonNumber(1), JsonNumber(2), JsonNumber(3)))
         )
     )
 
@@ -178,9 +178,15 @@ fun testVisitores(){
     json.accept(keyVisitor)
     println("Chaves válidas e únicas? ${keyVisitor.isValid}")
 
+    val json2 = JsonArray(listOf(
+        JsonArray(listOf(JsonNumber(1),JsonNumber(2))),
+        JsonArray(listOf(JsonNumber(1),JsonNumber(2))),
+        JsonArray(listOf(JsonNumber(3),JsonNumber(4)))
+    ))
+
     // Validar tipos homogêneos
     val typeVisitor = VisitorArrayElementsSameType()
-    json.accept(typeVisitor)
+    json2.accept(typeVisitor)
     println("Arrays homogêneos? ${typeVisitor.isSameType}")
 
 }
