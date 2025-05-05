@@ -1,11 +1,16 @@
 package jsonAlternative
 
+import kotlin.reflect.KProperty1
+import kotlin.reflect.KVisibility
+import kotlin.reflect.full.*
+
+
 fun convertToJson(objectToConvert: Any?) : JsonValue {
     /**
-     * 1º Recebe uma variavel qualquer
+     * 1º Recebe uma variável qualquer
      * 2º Verificar se existe um json para converter
      * - Se sim, retornar um JsonValue correspondente
-     * - Se não, mostra mensagem de erro a indicar que não é possivel
+     * - Se não, mostra mensagem de erro a indicar que não é possível
      */
     return when(objectToConvert) {
         is Int, is Double -> JsonNumber(objectToConvert)
@@ -14,7 +19,7 @@ fun convertToJson(objectToConvert: Any?) : JsonValue {
         is List<*> -> JsonArray(objectToConvert.map {
             convertToJson(it) }
         )
-        //Enums
+        is Enum<*> -> JsonString(objectToConvert.name)
         null -> JsonNull
         //data classes with properties whose type is supported
         //-> Transformado em JsonObject
@@ -32,4 +37,8 @@ fun convertToJson(objectToConvert: Any?) : JsonValue {
     }
 
 }
+
+
+
+
 
