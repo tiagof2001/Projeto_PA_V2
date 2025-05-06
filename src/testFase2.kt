@@ -63,11 +63,32 @@ class TestFase2{
 
     @Test
     fun dataToJson(){
-//        val course = Course("PA", 6, listOf(
-//            EvalItem("quizzes", .2, false, null),
-//            EvalItem("project", .8, true, EvalType.PROJECT))
-//        )
-//        val conversao = json_alternative.JsonObject(course)
+        val course = Course("PA", 6, listOf(
+            EvalItem("quizzes", .2, false, null),
+            EvalItem("project", .8, true, EvalType.PROJECT))
+        )
+        println(convertToJson(course).toJson())
     }
+    /**
+     * {
+     *  "credits": 6,
+     *  "evaluation": [
+     *      {
+     *          "mandatory": false,
+     *          "name": "quizzes",
+     *          "percentage": 0.2,
+     *          "type": null
+     *      },
+     *      {
+     *          "mandatory": true,
+     *          "name": "project",
+     *          "percentage": 0.8,
+     *          "type": "PROJECT"
+     *       }
+     *       ],
+     *       "name": "PA"
+     * }
+     *
+     */
 
 }

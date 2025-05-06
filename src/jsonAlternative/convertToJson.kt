@@ -4,7 +4,15 @@ import kotlin.reflect.KProperty1
 import kotlin.reflect.KVisibility
 import kotlin.reflect.full.*
 
-
+/**
+ * @param objectToConvert
+ * Qualquer objeto
+ *
+ * @return JsonValue correspondente ao tipo de objeto do input recebido
+ *
+ * @exception IllegalArgumentException
+ * Caso não exista conversão para o input recebido
+ */
 fun convertToJson(objectToConvert: Any?) : JsonValue {
     /**
      * 1º Recebe uma variável qualquer
@@ -21,8 +29,7 @@ fun convertToJson(objectToConvert: Any?) : JsonValue {
         )
         is Enum<*> -> JsonString(objectToConvert.name)
         null -> JsonNull
-        //data classes with properties whose type is supported
-        //-> Transformado em JsonObject
+
         is Map<*, *> -> {
             var conversion: List<Pair<String, JsonValue>> = listOf()
             objectToConvert.forEach { (key, value) ->
@@ -33,7 +40,19 @@ fun convertToJson(objectToConvert: Any?) : JsonValue {
             }
             return JsonObject(conversion)
         }
-        else -> throw IllegalArgumentException("Não existe conversão para json com o valor recebido")
+        else -> {
+            val kClass = objectToConvert::class as kotlin.reflect.KClass<Any>
+            if (kClass.isData) { // Verificação correta via reflection
+                val properties = kClass.memberProperties
+                val jsonFields = properties.map { prop ->
+                    prop.name to convertToJson(prop.get(objectToConvert))
+                }
+                JsonObject(jsonFields)
+            } else {
+                throw IllegalArgumentException("Não existe conversão para json com o valor recebido")
+            }
+        }
+//        else -> throw IllegalArgumentException("Não existe conversão para json com o valor recebido")
     }
 
 }
