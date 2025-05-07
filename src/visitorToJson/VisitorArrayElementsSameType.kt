@@ -10,18 +10,9 @@ class VisitorArrayElementsSameType : JsonVisitor {
         if (elements.isNotEmpty()) {
             isSameType = elements.all { it::class == elements.first()::class }
         }
-
-        for (value in array.getValues()) {
-            value.accept(this)
-        }
     }
 
-    override fun visitorObject(obj: JsonObject) {
-        for ((_, value) in obj.getMembers()) {
-            value.accept(this)
-        }
-    }
-
+    override fun visitorObject(obj: JsonObject) {}
     override fun visitorString(str: JsonString) {}
     override fun visitorNumber(num: JsonNumber) {}
     override fun visitorBoolean(bool: JsonBoolean) {}

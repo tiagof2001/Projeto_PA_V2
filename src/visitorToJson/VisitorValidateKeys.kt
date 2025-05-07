@@ -7,20 +7,11 @@ class VisitorValidateKeys : JsonVisitor {
 
     override fun visitorObject(obj: JsonObject) {
         val keys = obj.getMembers().map { it.first }
-
         isValid = keys.all { it.isNotBlank() } && keys.size == keys.toSet().size
 
-        for ((_, value) in obj.getMembers()) {
-            value.accept(this)
-        }
     }
 
-    override fun visitorArray(array: JsonArray) {
-        for (item in array.getValues()) {
-            item.accept(this)
-        }
-    }
-
+    override fun visitorArray(array: JsonArray) {}
     override fun visitorString(str: JsonString) {}
     override fun visitorNumber(num: JsonNumber) {}
     override fun visitorBoolean(bool: JsonBoolean) {}

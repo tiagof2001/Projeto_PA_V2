@@ -117,9 +117,12 @@ class TestFase2JsonValues {
             )
         )
         val filterName = testjson.filter { it.first == "name" }
-        assertEquals(filterName.toJson(),"{" + "\"name\": \"Alice\"" + "}")
+        val filterNameResult = JsonObject(listOf("name" to JsonString("Alice")))
+        assertEquals(filterName.toJson(),filterNameResult.toJson())
+
         val filterNumber = testjson.filter { it.second::class == JsonNumber::class }
-        assertEquals(filterNumber.toJson(),"{" + "\"age\": 30" + "}")
+        val filterNumberResult = JsonObject(listOf( "age" to JsonNumber(30)))
+        assertEquals(filterNumber.toJson(),filterNumberResult.toJson())
     }
 
     @Test
@@ -134,7 +137,8 @@ class TestFase2JsonValues {
         )
 
         val filtered = array.filter { it.toJson().toInt() % 2 == 0 }
-        assertEquals(filtered.toJson(), "[2, 4]")
+        val filterResult = JsonArray(listOf(JsonNumber(2),JsonNumber(4)))
+        assertEquals(filtered.toJson(), filterResult.toJson())
     }
 
     @Test
@@ -148,7 +152,10 @@ class TestFase2JsonValues {
         )
 
         val mapped = array.map { JsonNumber(it.toJson().toInt() * 10) }
-        assertEquals(mapped.toJson(), "[10, 20, 30]")
+        val mappedResult = JsonArray(listOf(JsonNumber(10),
+            JsonNumber(20),
+            JsonNumber(30)))
+        assertEquals(mapped.toJson(), mappedResult.toJson())
     }
 
 }

@@ -43,10 +43,12 @@ fun convertToJson(objectToConvert: Any?) : JsonValue {
         else -> {
             val kClass = objectToConvert::class as kotlin.reflect.KClass<Any>
             if (kClass.isData) { // Verificação correta via reflection
-                val properties = kClass.memberProperties
-                val jsonFields = properties.map { prop ->
-                    prop.name to convertToJson(prop.get(objectToConvert))
+                var jsonFields: List<Pair<String, JsonValue>> = listOf()
+                kClass.primaryConstructor?.parameters?.forEach { p ->
+                    val properties = kClass.declaredMemberProperties.first { it.name == p.name }
+                    jsonFields = jsonFields + listOf(properties.name to convertToJson(properties.call(objectToConvert)))
                 }
+
                 JsonObject(jsonFields)
             } else {
                 throw IllegalArgumentException("Não existe conversão para json com o valor recebido")

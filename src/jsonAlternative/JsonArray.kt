@@ -15,6 +15,12 @@ class JsonArray(private var value: List<JsonValue>) : JsonValue {
 
     override fun toJson(): String = value.joinToString(prefix = "[", postfix = "]") { it.toJson() }
 
-    override fun accept(visitor: JsonVisitor) { visitor.visitorArray(this) }
+    override fun accept(visitor: JsonVisitor) {
+
+        visitor.visitorArray(this)
+        for (value in getValues()) {
+            value.accept(visitor)
+        }
+    }
     fun getValues(): List<JsonValue> = value
 }

@@ -7,7 +7,9 @@ import visitorToJson.*
             listOf(
                 "nome" to JsonString("Alice"),
                 "idade" to JsonNumber(30),
-                "numero" to JsonArray(listOf(JsonNumber(1), JsonNumber(2), JsonNumber(3)))
+                "numero" to JsonArray(listOf(JsonNumber(1), JsonNumber(2), JsonNumber(3))),
+                "valor" to JsonArray(listOf(JsonString("N"), JsonNumber(2), JsonNumber(3)))
+
             )
         )
 
@@ -25,6 +27,9 @@ import visitorToJson.*
         // Validar tipos homogêneos
         val typeVisitor = VisitorArrayElementsSameType()
         json2.accept(typeVisitor)
+        println("Arrays homogêneos? ${typeVisitor.isSameType}")
+
+        json.accept(typeVisitor)
         println("Arrays homogêneos? ${typeVisitor.isSameType}")
     }
 

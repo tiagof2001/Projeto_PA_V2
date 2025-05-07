@@ -30,7 +30,13 @@ class JsonObject(private val members: List<Pair<String, JsonValue>>) : JsonValue
                 (key, value) -> "\"$key\": ${value.toJson()}"
         }
 
-    override fun accept(visitor: JsonVisitor) { visitor.visitorObject(this) }
+    override fun accept(visitor: JsonVisitor) {
+        visitor.visitorObject(this)
+
+        for ((_, value) in getMembers()) {
+            value.accept(visitor)
+        }
+    }
 
     fun getMembers(): List<Pair<String, JsonValue>> = members
 }
