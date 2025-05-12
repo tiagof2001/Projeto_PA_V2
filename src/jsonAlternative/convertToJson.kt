@@ -1,24 +1,14 @@
 package jsonAlternative
 
-import kotlin.reflect.KProperty1
-import kotlin.reflect.KVisibility
-import kotlin.reflect.full.*
+import kotlin.reflect.full.memberProperties
 
-/**
- * @param objectToConvert
- * Qualquer objeto
- *
- * @return JsonValue correspondente ao tipo de objeto do input recebido
- *
- * @exception IllegalArgumentException
- * Caso não exista conversão para o input recebido
- */
+
 fun convertToJson(objectToConvert: Any?) : JsonValue {
     /**
-     * 1º Recebe uma variável qualquer
+     * 1º Recebe uma variavel qualquer
      * 2º Verificar se existe um json para converter
      * - Se sim, retornar um JsonValue correspondente
-     * - Se não, mostra mensagem de erro a indicar que não é possível
+     * - Se não, mostra mensagem de erro a indicar que não é possivel
      */
     return when(objectToConvert) {
         is Int, is Double -> JsonNumber(objectToConvert)
@@ -27,9 +17,13 @@ fun convertToJson(objectToConvert: Any?) : JsonValue {
         is List<*> -> JsonArray(objectToConvert.map {
             convertToJson(it) }
         )
-        is Enum<*> -> JsonString(objectToConvert.name)
+        //Enums
         null -> JsonNull
+        //data classes with properties whose type is supported
 
+
+
+        //-> Transformado em JsonObject
         is Map<*, *> -> {
             var conversion: List<Pair<String, JsonValue>> = listOf()
             objectToConvert.forEach { (key, value) ->
@@ -40,26 +34,22 @@ fun convertToJson(objectToConvert: Any?) : JsonValue {
             }
             return JsonObject(conversion)
         }
+
         else -> {
             val kClass = objectToConvert::class as kotlin.reflect.KClass<Any>
             if (kClass.isData) { // Verificação correta via reflection
-                var jsonFields: List<Pair<String, JsonValue>> = listOf()
-                kClass.primaryConstructor?.parameters?.forEach { p ->
-                    val properties = kClass.declaredMemberProperties.first { it.name == p.name }
-                    jsonFields = jsonFields + listOf(properties.name to convertToJson(properties.call(objectToConvert)))
+                val properties = kClass.memberProperties
+                val jsonFields = properties.map { prop ->
+                    prop.name to convertToJson(prop.get(objectToConvert))
                 }
-
                 JsonObject(jsonFields)
             } else {
                 throw IllegalArgumentException("Não existe conversão para json com o valor recebido")
             }
         }
-//        else -> throw IllegalArgumentException("Não existe conversão para json com o valor recebido")
+
+        //else -> throw IllegalArgumentException("Não existe conversão para json com o valor recebido")
     }
 
 }
-
-
-
-
 
