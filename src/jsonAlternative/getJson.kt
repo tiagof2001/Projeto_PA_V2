@@ -10,12 +10,13 @@ import kotlin.reflect.KParameter
 import kotlin.reflect.full.createInstance
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.memberFunctions
+import jsonAlternative.convertToJson
 
-@Target(AnnotationTarget.CLASS)
+@Target(AnnotationTarget.CLASS,AnnotationTarget.FUNCTION)
 annotation class Mapping(val path: String = "")
 
-@Target(AnnotationTarget.FUNCTION)
-annotation class GetMapping(val path: String = "")
+//@Target(AnnotationTarget.FUNCTION)
+//annotation class GetMapping(val path: String = "")
 
 @Target(AnnotationTarget.VALUE_PARAMETER)
 annotation class PathParam(val name: String = "")
@@ -56,7 +57,7 @@ private class Router(controllers: List<Any>) {
         val basePath = controller::class.findAnnotation<Mapping>()?.path ?: ""
 
         controller::class.memberFunctions.forEach { func ->
-            func.findAnnotation<GetMapping>()?.let { mapping ->
+            func.findAnnotation<Mapping>()?.let { mapping ->
                 val fullPath = listOf(basePath, mapping.path)
                     .filter { it.isNotEmpty() }
                     .joinToString("/")
@@ -106,29 +107,32 @@ private class Router(controllers: List<Any>) {
         return function.parameters.associateWith { param ->
             when {
                 param.findAnnotation<PathParam>() != null ->
-                    convertType(
-                        pathParams[param.findAnnotation<PathParam>()?.name],
-                        param.type.classifier as KClass<*>
-                    )
+//                    convertType(
+//                        pathParams[param.findAnnotation<PathParam>()?.name],
+//                        param.type.classifier as KClass<*>
+//                    )
+                    convertToJson(param.type.classifier)
                 param.findAnnotation<QueryParam>() != null ->
-                    convertType(
-                        queryParams[param.findAnnotation<QueryParam>()?.name],
-                        param.type.classifier as KClass<*>
-                    )
+//                    convertType(
+//                        queryParams[param.findAnnotation<QueryParam>()?.name],
+//                        param.type.classifier as KClass<*>
+//
+//                    )
+                    convertToJson(param.type.classifier as KClass<*>)
                 else -> null
             }
         }
     }
 
-    private fun convertType(value: String?, type: KClass<*>): Any? {
-        return when (type) {
-            String::class -> value
-            Int::class -> value?.toInt()
-            Double::class -> value?.toDouble()
-            Boolean::class -> value?.toBoolean()
-            else -> throw IllegalArgumentException("Tipo não suportado: $type")
-        }
-    }
+//    private fun convertType(value: String?, type: KClass<*>): Any? {
+//        return when (type) {
+//            String::class -> value
+//            Int::class -> value?.toInt()
+//            Double::class -> value?.toDouble()
+//            Boolean::class -> value?.toBoolean()
+//            else -> throw IllegalArgumentException("Tipo não suportado: $type")
+//        }
+//    }
 }
 
 private class Route(
