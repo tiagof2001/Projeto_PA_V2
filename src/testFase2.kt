@@ -69,6 +69,20 @@ class TestFase2{
         )
         println(convertToJson(course).toJson())
     }
+
+    @Test
+    fun pairToJson(){
+        val pair: Pair<String, String> = Pair("um", "dois")
+        val person = JsonObject(
+            listOf(
+                "first" to JsonString("um"),
+                "second" to JsonString("dois")
+            )
+        )
+        println(convertToJson(pair).toJson())
+        assertEquals(convertToJson(pair).toJson(), person.toJson())
+
+    }
     /**
      * {
      *  "credits": 6,

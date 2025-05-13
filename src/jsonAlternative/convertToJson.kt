@@ -28,8 +28,16 @@ fun convertToJson(objectToConvert: Any?) : JsonValue {
             convertToJson(it) }
         )
         is Enum<*> -> JsonString(objectToConvert.name)
+        is Pair<*,*> -> {
+            var jsonFields: List<Pair<String, JsonValue>> = listOf()
+            val kClass = objectToConvert::class as kotlin.reflect.KClass<*>
+            kClass.primaryConstructor?.parameters?.forEach { p ->
+                val properties = kClass.declaredMemberProperties.first { it.name == p.name }
+                jsonFields = jsonFields + listOf(properties.name to convertToJson(properties.call(objectToConvert)))
+            }
+            JsonObject(jsonFields)
+        }
         null -> JsonNull
-
         is Map<*, *> -> {
             var conversion: List<Pair<String, JsonValue>> = listOf()
             objectToConvert.forEach { (key, value) ->
