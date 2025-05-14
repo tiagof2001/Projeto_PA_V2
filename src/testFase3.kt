@@ -72,7 +72,7 @@ class TestFase3 {
             .url("http://localhost:8080/api/path/a")
             .build()
         val response = client.newCall(request).execute()
-        assertEquals("A", response.body?.string())
+        assertEquals(JsonString("A").toJson(), response.body?.string())
     }
 
     @Test

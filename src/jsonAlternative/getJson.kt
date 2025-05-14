@@ -80,11 +80,10 @@ class Router(controllers: List<Any>) {
         val path = uri.path.drop(1)
         println("Caminho a pedir: $path")
 
-
-//        val route = routes.forEach { it -> if(path.contains(it.key)) it else throw IllegalArgumentException("Rota não encontrada: $path") }
-
-        val route = routes[path] ?: throw IllegalArgumentException("Rota não encontrada: $path")
-
+        val route = routes.entries.find { entry ->
+            val pattern = entry.key.replace("{var}", ".*").toRegex()
+            pattern.matches(path)
+        }?.value ?: throw IllegalArgumentException("Rota não encontrada: $path")
         println(route.path)
 
         val pathParams = extractPathParams(uri, route)
