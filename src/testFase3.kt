@@ -10,36 +10,17 @@ import kotlin.collections.List
 
 class TestFase3 {
 
-    @Mapping("api")
-    class Controller {
-        @Mapping("ints")
-        fun demo(): List<Int> = listOf(1, 2, 3)
-
-        @Mapping("pair")
-        fun obj(): Pair<String, String> = Pair("um", "dois")
-
-        @Mapping("path/{pathvar}")
-        fun path(
-            @PathParam pathvar: String
-        ): String = "$pathvar!"
-
-        @Mapping("args")
-        fun args(
-            @QueryParam n: Int,
-            @QueryParam text: String
-        ): Map<String, String> = mapOf(text to text.repeat(n))
-    }
-
     companion object {
-        private lateinit var server: jsonAlternative.GetJson
+        private lateinit var server: GetJson
 
         @BeforeAll
         @JvmStatic
         fun setup() {
-            server = _root_ide_package_.jsonAlternative.GetJson(
+            server = GetJson(
                 TestController::class,
-                CourseController::class,
-                Controller::class)
+                CourseController::class
+                //Controller::class
+            )
             server.start(8080)
         }
 
@@ -53,9 +34,9 @@ class TestFase3 {
     // Testes Fase 1: Modelo JSON
     @Test
     fun `test serialization of JsonObject`() {
-        val obj = _root_ide_package_.jsonAlternative.JsonObject(
+        val obj = JsonObject(
             listOf(
-                "name" to _root_ide_package_.jsonAlternative.JsonString("PA")
+                "name" to JsonString("PA")
             )
         )
         assertEquals("""{"name": "PA"}""", obj.toJson())
@@ -65,8 +46,8 @@ class TestFase3 {
     @Test
     fun `test convert data class to JSON`() {
         val course = Course("PA", 6, emptyList())
-        val json = _root_ide_package_.jsonAlternative.convertToJson(course)
-        assertTrue(json is jsonAlternative.JsonObject)
+        val json = convertToJson(course)
+        assertTrue(json is JsonObject)
         assertEquals("""{"name": "PA", "credits": 6, "evaluation": []}""", json.toJson())
     }
 
@@ -76,24 +57,23 @@ class TestFase3 {
 
         val client = OkHttpClient()
         val request = Request.Builder()
-            .url("http://localhost/api/ints")
+            .url("http://localhost:8080/api/ints")
             .build()
-        //            .url("http://localhost:8080/api/ints")
         val response = client.newCall(request).execute()
-        assertEquals("""[1,2,3]""", response.body?.string())
+        assertEquals("""[1, 2, 3]""", response.body?.string())
     }
 
-//    @Test
-//    fun `test GET api_ints endpoint_path`() {
-//
-//        val client = OkHttpClient()
-//        val request = Request.Builder()
-//            .url("http://localhost/api/path/a")
-//            .build()
-//        //            .url("http://localhost:8080/api/ints")
-//        val response = client.newCall(request).execute()
-//        assertEquals("A", response.body?.string())
-//    }
+
+    @Test
+    fun `test GET api_ints endpoint_PathParam`() {
+
+        val client = OkHttpClient()
+        val request = Request.Builder()
+            .url("http://localhost:8080/api/path/a")
+            .build()
+        val response = client.newCall(request).execute()
+        assertEquals("A", response.body?.string())
+    }
 
     @Test
     fun `test nested data class conversion`() {
@@ -109,27 +89,26 @@ class TestFase3 {
     fun `test invalid route returns 404`() {
         val client = OkHttpClient()
         val request = Request.Builder()
-            .url("http://localhost/invalid")
+            .url("http://localhost:8080/invalid")
             .build()
-        //            .url("http://localhost:8080/invalid")
         val response = client.newCall(request).execute()
         assertEquals(404, response.code)
     }
 }
 
 // Controladores de Teste
-@jsonAlternative.Mapping("api")
+@Mapping("api")
 class TestController {
-    @jsonAlternative.Mapping("ints")
+    @Mapping("ints")
     fun getInts() : List<Int> = listOf(1, 2, 3)
 
-    @jsonAlternative.Mapping("path/{var}")
-    fun getPath(@jsonAlternative.PathParam("var") param: String) = param.uppercase()
+    @Mapping("path/{var}")
+    fun getPath(@PathParam("var") param: String) = param.uppercase()
 }
 
-@jsonAlternative.Mapping("courses")
+@Mapping("courses")
 class CourseController {
-    @jsonAlternative.Mapping("sample")
+    @Mapping("sample")
     fun getCourse() = Course(
         "PA", 6, listOf(
             EvalItem("quizzes", 0.2, false, null)
