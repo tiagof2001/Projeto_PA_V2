@@ -76,6 +76,22 @@ class TestFase3 {
     }
 
     @Test
+    fun `test GET api_ints endpoint_QueryParam`() {
+
+        val client = OkHttpClient()
+        val request = Request.Builder()
+            .url("http://localhost:8080/api/args?n=3&text=PA")
+            .build()
+        val response = client.newCall(request).execute()
+
+        val result = TestController()
+
+        assertEquals(
+            convertToJson(result.args(3,"PA")).toJson(),
+            response.body?.string())
+    }
+
+    @Test
     fun `test nested data class conversion`() {
         val evalItem = EvalItem("test", 0.5, true, EvalType.TEST)
         val json = _root_ide_package_.jsonAlternative.convertToJson(evalItem)
@@ -104,6 +120,12 @@ class TestController {
 
     @Mapping("path/{var}")
     fun getPath(@PathParam("var") param: String) = param.uppercase()
+
+    @Mapping("args")
+    fun args(
+        @QueryParam n: Int,
+        @QueryParam text: String
+    ): Map<String, String> = mapOf(text to text.repeat(n))
 }
 
 @Mapping("courses")

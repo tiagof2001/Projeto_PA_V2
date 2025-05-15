@@ -51,7 +51,8 @@ class GetJson(private vararg val controllers: KClass<*>) {
 }
 
 //private
-//Verificar se o conteudo do do 1 mapping não existe controladores com o mesmo nome
+//Verificar se o conteudo de 1 mapping não existe controladores com o mesmo nome
+
 class Router(controllers: List<Any>) {
     private val routes = mutableMapOf<String, Route>()
 
@@ -89,15 +90,9 @@ class Router(controllers: List<Any>) {
         val pathParams = extractPathParams(uri, route)
         val queryParams = parseQueryParams(uri.query)
 
-        println(pathParams)
-        println(queryParams)
         val args = prepareArguments(route.function, pathParams, queryParams,route.controller)
 
-//        args.forEach { it -> println(it.key.toString() +" : "+ it.value.toString()) }
-        println(args.toString())
         val result = route.invoke(args)
-
-//        println("Result -> " + result)
 
         return convertToJson(result).toJson()
     }
@@ -115,9 +110,8 @@ class Router(controllers: List<Any>) {
     }
 
     private fun parseQueryParams(query: String?): Map<String, String> {
-        println("Procurando Query")
-        return query?.split('&')?.associate {
-            val (key, value) = it.split('=', ignoreCase = true, limit = 2)
+        return query?.split("&")?.associate {
+            val (key, value) = it.split("=")
             key to value
         } ?: emptyMap()
     }
@@ -127,29 +121,28 @@ class Router(controllers: List<Any>) {
         pathParams: Map<String, String>,
         queryParams: Map<String, String>,
         controller: Any
-    ): Map<KParameter, Any?> {
-
-//        controller = route.controller
-//        function = route.function
-
-        return function.parameters.associateWith { param ->
+    ): Array<Any?> {
+        return function.parameters.map { parameter ->
             when {
-                // Se for o parâmetro "instance" (controlador), retornamos a instância
-                param.kind == KParameter.Kind.INSTANCE -> controller
-                // Se for um PathParam, extraímos o valor correspondente e convertemos
-                param.findAnnotation<PathParam>() != null -> {
-                    val paramName = param.findAnnotation<PathParam>()?.name
-                    convertType(pathParams[paramName], param.type.classifier as KClass<*>)
+                parameter.kind == KParameter.Kind.INSTANCE -> controller
+                parameter.annotations.any { it is PathParam } -> {
+                    val paramName = parameter.annotations.filterIsInstance<PathParam>().first().name
+                    pathParams[paramName]
                 }
-                // Se for um QueryParam, extraímos o valor correspondente e convertemos
-                param.findAnnotation<QueryParam>() != null -> {
-                    val paramName = param.findAnnotation<QueryParam>()?.name
-                    convertType(queryParams[paramName], param.type.classifier as KClass<*>)
+                parameter.annotations.any { it is QueryParam } -> {
+                    val paramName = parameter.name
+                    val value = queryParams[paramName]
+                    if (value != null) {
+                        when (parameter.type.classifier) {
+                            Int::class -> value.toIntOrNull()
+                            String::class -> value
+                            else -> value
+                        }
+                    } else null
                 }
-
-                else -> null // Caso não seja nenhum dos parâmetros conhecidos, retorna null
+                else -> null
             }
-        }
+        }.toTypedArray()
     }
 
     private fun convertType(value: String?, type: KClass<*>): Any? {
@@ -183,8 +176,8 @@ private class Route(
     val function: KFunction<*>,
     val path: String = ""
 ) {
-    fun invoke(args: Map<KParameter, Any?>): Any? {
-        return function.callBy(args.toMap())
-//                return function.callBy(args)
+    fun invoke(args: Array<Any?>): Any? {
+        val params = function.parameters.zip(args).toMap()
+        return function.callBy(params)
     }
 }
