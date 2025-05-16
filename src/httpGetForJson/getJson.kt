@@ -1,7 +1,8 @@
-package jsonAlternative
+package httpGetForJson
 
 import com.sun.net.httpserver.HttpExchange
 import com.sun.net.httpserver.HttpServer
+import convertToJson.*
 import java.net.InetSocketAddress
 import java.net.URI
 
@@ -11,52 +12,54 @@ import kotlin.reflect.KParameter
 import kotlin.reflect.full.createInstance
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.memberFunctions
-import jsonAlternative.convertToJson
-import kotlin.reflect.full.instanceParameter
 
-@Target(AnnotationTarget.CLASS,AnnotationTarget.FUNCTION,AnnotationTarget.VALUE_PARAMETER)
-annotation class Mapping(val path: String = "")
+import httpGetForJson.annotationList.*
 
-@Target(AnnotationTarget.VALUE_PARAMETER)
-annotation class PathParam(val name: String = "")
 
-@Target(AnnotationTarget.VALUE_PARAMETER)
-annotation class QueryParam(val name: String = "")
-
-class GetJson(private vararg val controllers: KClass<*>) {
-    private val router = Router(controllers.map { it.createInstance() })
+/**
+ * Melhorar com o prepareArguments para anotações do tipo @queryParam
+ * - Limitado a valores do tipo Int e "String"
+ */
+class GetJson(vararg controllers: KClass<*>, var convertion: JsonConverter) {
+    private val router = Router(controllers.map { it.createInstance() },convertion)
 
     fun start(port: Int) {
-
         val server = HttpServer.create(InetSocketAddress(port), 0)
         server.createContext("/") { handleRequest(it) }
         server.executor = null
         server.start()
-        println("Server started on port $port")
     }
 
     private fun handleRequest(exchange: HttpExchange) {
-
         try {
-            println("Iniciar Request")
             val response = router.handle(exchange.requestURI)
             exchange.sendResponseHeaders(200, response.toByteArray().size.toLong())
             exchange.responseBody.use { it.write(response.toByteArray()) }
         } catch (e: Exception) {
-            println("Falha Request")
+            exchange.sendResponseHeaders(404, 0)
+            exchange.responseBody.use { it.write(e.message?.toByteArray() ?: byteArrayOf()) }
+        } catch (e: Exception) {
             exchange.sendResponseHeaders(500, 0)
             exchange.responseBody.use { it.write(e.message?.toByteArray() ?: byteArrayOf()) }
         }
     }
 }
 
-//private
-//Verificar se o conteudo de 1 mapping não existe controladores com o mesmo nome
 
-class Router(controllers: List<Any>) {
+private class Router(controllers: List<Any>, var convertion: JsonConverter) {
     private val routes = mutableMapOf<String, Route>()
 
     init {
+
+        val basePathCounts = controllers.mapNotNull { it::class.findAnnotation<Mapping>()?.path }
+            .groupingBy{ it }.eachCount()
+
+        val duplicateBasePaths = basePathCounts.filter { it.value > 1 }
+
+        if (duplicateBasePaths.isNotEmpty()) {
+            throw IllegalArgumentException("Existem controladores com o mesmo path base: ${duplicateBasePaths.keys}")
+        }
+
         controllers.forEach { registerController(it) }
     }
 
@@ -71,7 +74,6 @@ class Router(controllers: List<Any>) {
                     .replace("//", "/")
 
                 routes[fullPath] = Route(controller, func, fullPath)
-                println(fullPath)
             }
         }
     }
@@ -79,26 +81,26 @@ class Router(controllers: List<Any>) {
     fun handle(uri: URI): String {
 
         val path = uri.path.drop(1)
-        println("Caminho a pedir: $path")
 
-        val route = routes.entries.find { entry ->
-            val pattern = entry.key.replace("{var}", ".*").toRegex()
-            pattern.matches(path)
-        }?.value ?: throw IllegalArgumentException("Rota não encontrada: $path")
-        println(route.path)
+        val route = routes.entries
+            .sortedByDescending { it.key.count { char -> char == '/' } } // Prioriza rotas mais específicas
+            .find { entry ->
+                val pattern = entry.key.replace(Regex("\\{[^/]+\\}"), "([^/]+)").toRegex()
+                pattern.matches(path)
+            }?.value ?: throw IllegalArgumentException("Rota não encontrada: $path")
 
         val pathParams = extractPathParams(uri, route)
         val queryParams = parseQueryParams(uri.query)
 
         val args = prepareArguments(route.function, pathParams, queryParams,route.controller)
-
         val result = route.invoke(args)
 
-        return convertToJson(result).toJson()
+        //Possivel erro - ser criado nova opção de conversão
+
+        return convertion.objectToJson(result).toJson()
     }
 
     private fun extractPathParams(uri: URI, route: Route): Map<String, String> {
-        println("Procurando parâmetros")
         val pathSegments = uri.path.split('/').filter { it.isNotEmpty() }
         val routeSegments = route.path.split('/').filter { it.isNotEmpty() }
 
@@ -129,12 +131,14 @@ class Router(controllers: List<Any>) {
                     val paramName = parameter.annotations.filterIsInstance<PathParam>().first().name
                     pathParams[paramName]
                 }
+                //Limitado a valores do tipo Int e String
                 parameter.annotations.any { it is QueryParam } -> {
                     val paramName = parameter.name
                     val value = queryParams[paramName]
                     if (value != null) {
                         when (parameter.type.classifier) {
-                            Int::class -> value.toIntOrNull()
+                            Number::class -> value.toIntOrNull()
+                            Boolean::class -> value.toBooleanStrictOrNull()
                             String::class -> value
                             else -> value
                         }
@@ -143,31 +147,6 @@ class Router(controllers: List<Any>) {
                 else -> null
             }
         }.toTypedArray()
-    }
-
-    private fun convertType(value: String?, type: KClass<*>): Any? {
-        return when (type) {
-            String::class -> value
-            Int::class -> value?.toIntOrNull()
-            Double::class -> value?.toDoubleOrNull()
-            Boolean::class -> value?.toBoolean()
-            List::class -> value?.split(",")?.map { it.trim() }
-            else -> {
-                // Caso o tipo não seja um tipo primitivo ou uma lista, tentamos criar uma instância do tipo
-                try {
-                    if (value.isNullOrEmpty()) {
-                        null
-                    } else {
-                        // Tentando converter para um tipo personalizado (se houver algum tipo especializado)
-                        val constructor = type.constructors.firstOrNull()
-                        constructor?.call(value)
-                    }
-                } catch (e: Exception) {
-                    println("Erro ao tentar converter valor '$value' para o tipo ${type.simpleName}")
-                    null
-                }
-            }
-        }
     }
 }
 
