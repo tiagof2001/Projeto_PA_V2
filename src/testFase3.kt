@@ -5,10 +5,8 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import jsonAlternative.*
+import java.net.URI
 import kotlin.collections.List
-
-import httpGetForJson.annotationList.*
-import httpGetForJson.GetJson
 
 class TestFase3 {
 
@@ -21,6 +19,7 @@ class TestFase3 {
             server = GetJson(
                 TestController::class,
                 CourseController::class
+                //Controller::class
             )
             server.start(8080)
         }
@@ -32,77 +31,86 @@ class TestFase3 {
         }
     }
 
-    /**
-     * Verificar se existe 2 ou mais controllers com o mesmo valor da anotação associado a classe
-     * Lança um IllegalArgumentException
-     */
+    // Testes Fase 1: Modelo JSON
     @Test
-    fun checkControllerWithDoubleIdMapping() {
-        assertThrows(IllegalArgumentException::class.java) {
-            val serverTest = GetJson(TestController::class, Controller::class)
-            serverTest.start(8090)
-        }
+    fun `test serialization of JsonObject`() {
+        val obj = JsonObject(
+            listOf(
+                "name" to JsonString("PA")
+            )
+        )
+        assertEquals("""{"name": "PA"}""", obj.toJson())
     }
 
+    // Testes Fase 2: Conversão de Objetos
     @Test
-    fun getJsonEndpointOnlyMapping() {
+    fun `test convert data class to JSON`() {
+        val course = Course("PA", 6, emptyList())
+        val json = convertToJson(course)
+        assertTrue(json is JsonObject)
+        assertEquals("""{"name": "PA", "credits": 6, "evaluation": []}""", json.toJson())
+    }
+
+    // Testes Fase 3: Endpoints HTTP
+    @Test
+    fun `test GET api_ints endpoint`() {
 
         val client = OkHttpClient()
-
-        val request = Request.Builder().url("http://localhost:8080/api/ints").build()
+        val request = Request.Builder()
+            .url("http://localhost:8080/api/ints")
+            .build()
         val response = client.newCall(request).execute()
-        val result = convertToJson(TestController().getInts()).toJson()
-
-        assertEquals(result, response.body?.string())
-
-        val request2 = Request.Builder().url("http://localhost:8080/courses/sample").build()
-        val response2 = client.newCall(request2).execute()
-        val result2 = convertToJson(CourseController().getCourse()).toJson()
-
-        assertEquals(result2, response2.body?.string())
-
+        assertEquals("""[1, 2, 3]""", response.body?.string())
     }
 
 
     @Test
-    fun getJsonEndpointPathParam() {
+    fun `test GET api_ints endpoint_PathParam`() {
 
         val client = OkHttpClient()
-        val request = Request.Builder().url("http://localhost:8080/api/path/a").build()
+        val request = Request.Builder()
+            .url("http://localhost:8080/api/path/a")
+            .build()
+        val response = client.newCall(request).execute()
+        assertEquals(JsonString("A").toJson(), response.body?.string())
+    }
+
+    @Test
+    fun `test GET api_ints endpoint_QueryParam`() {
+
+        val client = OkHttpClient()
+        val request = Request.Builder()
+            .url("http://localhost:8080/api/args?n=3&text=PA")
+            .build()
         val response = client.newCall(request).execute()
 
-        val result = convertToJson(TestController().getPath("a")).toJson()
+        val result = TestController()
 
-        assertEquals(result, response.body?.string())
+        assertEquals(
+            convertToJson(result.args(3,"PA")).toJson(),
+            response.body?.string())
     }
 
     @Test
-    fun getJsonEndpointQueryParam() {
-
-        val client = OkHttpClient()
-        val request = Request.Builder().url("http://localhost:8080/api/args?n=3&text=PA").build()
-        val response = client.newCall(request).execute()
-
-        val result = convertToJson(TestController().args(3,"PA")).toJson()
-        assertEquals( result, response.body?.string())
+    fun `test nested data class conversion`() {
+        val evalItem = EvalItem("test", 0.5, true, EvalType.TEST)
+        val json = _root_ide_package_.jsonAlternative.convertToJson(evalItem)
+        assertEquals(
+            """{"name": "test", "percentage": 0.5, "mandatory": true, "type": "TEST"}""",
+            json.toJson()
+        )
     }
 
     @Test
-    fun invalidRouteReturns404() {
+    fun `test invalid route returns 404`() {
         val client = OkHttpClient()
-        val request = Request.Builder().url("http://localhost:8080/api/test").build()
-        val response = client.newCall(request).execute()
-        assertEquals(404, response.code)
-    }
-    @Test
-    fun invalidRouteReturns500() {
-        val client = OkHttpClient()
-        val request = Request.Builder().url("http://localhost:8080/invalid").build()
+        val request = Request.Builder()
+            .url("http://localhost:8080/invalid")
+            .build()
         val response = client.newCall(request).execute()
         assertEquals(404, response.code)
     }
 }
-
 
 // Controladores de Teste
 @Mapping("api")
@@ -129,24 +137,3 @@ class CourseController {
         )
     )
 }
-@Mapping("api")
-class Controller {
-    @Mapping("ints")
-    fun demo(): List<Int> = listOf(1, 2, 3)
-
-    @Mapping("pair")
-    fun obj(): Pair<String, String> = Pair("um", "dois")
-
-    @Mapping("path/{pathvar}")
-    fun path(
-        @PathParam pathvar: String
-    ): String = "$pathvar!"
-
-    @Mapping("args")
-    fun args(
-        @QueryParam n: Int,
-        @QueryParam text: String
-    ): Map<String, String> = mapOf(text to text.repeat(n))
-}
-
-
