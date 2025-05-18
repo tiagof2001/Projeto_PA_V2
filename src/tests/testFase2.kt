@@ -1,6 +1,8 @@
+package tests
+
 import jsonAlternative.*
 import junit.framework.TestCase.assertEquals
-import objectToJson.*
+import convertObjectToJson.*
 import org.junit.Test
 
 data class Course(
@@ -50,6 +52,12 @@ class TestFase2{
         val testMap = mapOf<String, Any?>( "teste1" to 10, "teste2" to 20 )
         val resultMap = listOf<Pair<String, JsonValue>>("teste1" to JsonNumber(10), "teste2" to JsonNumber(20))
         assertEquals(testMap.convertToJson().toJson(), JsonObject(resultMap).toJson())
+
+        /**
+         * val testMap = mapOf<String, Any?>( "teste1" to 10, "teste2" to 20 )
+         *         val resultMap = mapOf<String, JsonValue>("teste1" to JsonNumber(10), "teste2" to JsonNumber(20))
+         *         assertEquals(testMap.convertToJson().toJson(), JsonObject(resultMap).toJson())
+         */
     }
 
     @Test
@@ -67,10 +75,10 @@ class TestFase2{
 
     @Test
     fun dataToJson(){
-        val course = Course("PA", 6, listOf(
-            EvalItem("quizzes", .2, false, null),
-            EvalItem("project", .8, true, EvalType.PROJECT))
-        )
+//        val course = tests.Course("PA", 6, listOf(
+//            tests.EvalItem("quizzes", .2, false, null),
+//            tests.EvalItem("project", .8, true, tests.EvalType.PROJECT))
+//        )
         //println(course.convertToJson().toJson())
     }
 

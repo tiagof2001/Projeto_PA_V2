@@ -14,7 +14,7 @@ import kotlin.reflect.KParameter
 import kotlin.reflect.full.createInstance
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.memberFunctions
-import objectToJson.convertToJson
+import convertObjectToJson.convertToJson
 
 /**
  * Inicializa e arranca um servidor HTTP simples que encaminha pedidos HTTP para os endpoints apropriados com base
@@ -67,7 +67,6 @@ class GetJson(private vararg val controllers: KClass<*>) {
         server.createContext("/") { handleRequest(it) }
         server.executor = null
         server.start()
-        println("Server started on port $port")
     }
 
     /**
@@ -166,7 +165,6 @@ class Router(controllers: List<Any>) {
                     .replace("//", "/")
 
                 routes[fullPath] = Route(controller, func, fullPath)
-                println(fullPath)
             }
         }
     }
@@ -187,7 +185,6 @@ class Router(controllers: List<Any>) {
     fun handle(uri: URI): String {
 
         val path = uri.path.drop(1)
-        println("Caminho a pedir: $path")
 
         val route = routes.entries
             .sortedByDescending { it.key.count { char -> char == '/' } } // Prioriza rotas mais específicas
@@ -214,7 +211,6 @@ class Router(controllers: List<Any>) {
      */
 
     private fun extractPathParams(uri: URI, route: Route): Map<String, String> {
-        println("Procurando parâmetros")
         val pathSegments = uri.path.split('/').filter { it.isNotEmpty() }
         val routeSegments = route.path.split('/').filter { it.isNotEmpty() }
 

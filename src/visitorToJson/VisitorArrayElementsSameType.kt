@@ -32,8 +32,8 @@ class VisitorArrayElementsSameType : JsonVisitor {
      * de tipos entre os elementos do array.
      */
 
-    var isSameType = true
-
+    private var isSameType = true
+    fun getIsSameType(): Boolean = isSameType
     /**
      * Processa um `JsonArray` para determinar se todos os elementos não nulos têm o mesmo tipo.
      *

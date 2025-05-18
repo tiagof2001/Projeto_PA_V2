@@ -1,3 +1,5 @@
+package tests
+
 import httpGetForJson.*
 import httpGetForJson.annotationList.*
 import okhttp3.OkHttpClient
@@ -7,7 +9,7 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import jsonAlternative.*
-import objectToJson.convertToJson
+import convertObjectToJson.convertToJson
 import kotlin.collections.List
 
 class TestFase3 {
@@ -21,7 +23,6 @@ class TestFase3 {
             server = GetJson(
                 TestController::class,
                 CourseController::class
-                //Controller::class
             )
             server.start(8080)
         }
@@ -33,9 +34,18 @@ class TestFase3 {
         }
     }
 
+    @Test
+    fun controllersWithSameUrlBase(){
+
+        assertThrows(IllegalArgumentException::class.java) {
+            val serverTest = GetJson(TestController::class, CopyController::class)
+            serverTest.start(8090)
+        }
+    }
+
     // Testes Fase 3: Endpoints HTTP
     @Test
-    fun `test GET api_ints endpoint`() {
+    fun getJsonEndpointMapping() {
 
         val client = OkHttpClient()
         val request = Request.Builder()
@@ -55,6 +65,19 @@ class TestFase3 {
             .build()
         val response = client.newCall(request).execute()
         assertEquals(JsonString("A").toJson(), response.body?.string())
+
+    }
+
+    @Test
+    fun getJsonEndpointPathParamPair() {
+        val client = OkHttpClient()
+        val requestNew = Request.Builder().url("http://localhost:8080/api/pair").build()
+        val responseNew = client.newCall(requestNew).execute()
+
+        assertEquals(
+            TestController().obj().convertToJson().toJson(),
+            responseNew.body?.string())
+
     }
 
     @Test
@@ -110,6 +133,12 @@ class TestController {
         @QueryParam n: Int,
         @QueryParam text: String
     ): Map<String, String> = mapOf(text to text.repeat(n))
+}
+
+@Mapping("api")
+class CopyController {
+    @Mapping("ints")
+    fun getInts() : List<Int> = listOf(1, 2, 3)
 }
 
 @Mapping("courses")
