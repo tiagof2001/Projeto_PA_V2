@@ -9,7 +9,7 @@ Funcionalidades:
 - Definição de endpoints HTTP/GET via anotações (@Mapping, @PathParam, @QueryParam);
 - Validação de objetos e arrays via visitor;
 - Testes unitários com JUnit;
-- - Serialização de modelos JSON para string compatível com o padrão.
+- Serialização de modelos JSON para string compatível com o padrão.
 
 Instruções de utilização
 
