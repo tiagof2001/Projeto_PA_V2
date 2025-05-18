@@ -24,22 +24,10 @@ fun Any?.convertToJson() : JsonValue = when(this) {
         is Int, is Double -> JsonNumber(this)
         is String -> JsonString(this)
         is Boolean -> JsonBoolean(this)
-        is List<*> -> JsonArray(this.map {
-            it.convertToJson()
-        }
-        )
+        is List<*> -> JsonArray(this.map {it.convertToJson()})
         is Enum<*> -> JsonString(this.name)
-
         null -> JsonNull
-        is Map<*, *> -> {
-            var conversion: List<Pair<String, JsonValue>> = listOf()
-            this.forEach { (key, value) ->
-                if (key is String) {
-                    conversion = conversion + listOf(key to value.convertToJson())
-                }
-            }
-            JsonObject(conversion)
-        }
+
         else -> {
             val kClass = this::class as KClass<Any>
             if (kClass.isData) { // Verificação correta via reflection
@@ -54,11 +42,21 @@ fun Any?.convertToJson() : JsonValue = when(this) {
                 throw IllegalArgumentException("Não existe conversão para json com o valor recebido")
             }
         }
-//        else -> throw IllegalArgumentException("Não existe conversão para json com o valor recebido")
+
+}
+
+fun Map<*,*>.convertToJson() : JsonValue {
+        var conversion: List<Pair<String, JsonValue>> = listOf()
+        this.forEach { (key, value) ->
+            if (key is String) {
+                conversion = conversion + listOf(key to value.convertToJson())
+            }
+        }
+        return JsonObject(conversion)
 }
 
 
-fun Pair<*, *>.convertToJson() : JsonValue {
+fun Pair<String, String>.convertToJson() : JsonValue {
 
     var jsonFields: List<Pair<String, JsonValue>> = listOf()
     val kClass = this::class as KClass<*>
