@@ -5,6 +5,9 @@ import visitorToJson.JsonVisitor
 /**
  * @constructor
  * Criar um objecto do tipo json_alternative.JsonValue recebendo como parametro um objeto do tipo String
+ *
+ * @exception
+ * Caso o conteúdo que recebe for do tipo Number
  */
 class JsonString(private var value: String) : JsonValue{
 
@@ -17,8 +20,10 @@ class JsonString(private var value: String) : JsonValue{
 
     init {
         if(value.matches(Regex("-?\\d+(\\.\\d+)?"))){
-            throw NumberFormatException("$value é um número, adicionar um caractere ao $value ou usa a classe JsonNumber")
+            throw NumberFormatException("\"$value\" é um número, adicionar um caractere ao \"$value\" ou usa a classe JsonNumber")
         }
+
+
     }
 
     override fun toJson(): String = "\"${value}\""
