@@ -14,8 +14,9 @@ import jsonAlternative.*
  */
 
 class VisitorValidateKeys : JsonVisitor {
-    var isValid = true
+    private var isValid = true
 
+    fun getValid(): Boolean = isValid
     /**
      * Verifica a validade das chaves em um `JsonObject`.
      *
