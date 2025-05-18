@@ -56,13 +56,4 @@ fun Map<*,*>.convertToJson() : JsonValue {
 }
 
 
-fun Pair<String, String>.convertToJson() : JsonValue {
 
-    var jsonFields: List<Pair<String, JsonValue>> = listOf()
-    val kClass = this::class as KClass<*>
-    kClass.primaryConstructor?.parameters?.forEach { p ->
-        val properties = kClass.declaredMemberProperties.first { it.name == p.name }
-        jsonFields = jsonFields + listOf(properties.name to properties.call(p).convertToJson())
-    }
-    return JsonObject(jsonFields)
-}
