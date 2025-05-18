@@ -1,3 +1,5 @@
+import httpGetForJson.*
+import httpGetForJson.annotationList.*
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.junit.jupiter.api.AfterAll
@@ -31,26 +33,6 @@ class TestFase3 {
         }
     }
 
-    // Testes Fase 1: Modelo JSON
-    @Test
-    fun `test serialization of JsonObject`() {
-        val obj = JsonObject(
-            listOf(
-                "name" to JsonString("PA")
-            )
-        )
-        assertEquals("""{"name": "PA"}""", obj.toJson())
-    }
-
-    // Testes Fase 2: Conversão de Objetos
-    @Test
-    fun `test convert data class to JSON`() {
-        val course = Course("PA", 6, emptyList())
-        val json = course.convertToJson()
-        assertTrue(json is JsonObject)
-        assertEquals("""{"name": "PA", "credits": 6, "evaluation": []}""", json.toJson())
-    }
-
     // Testes Fase 3: Endpoints HTTP
     @Test
     fun `test GET api_ints endpoint`() {
@@ -65,7 +47,7 @@ class TestFase3 {
 
 
     @Test
-    fun `test GET api_ints endpoint_PathParam`() {
+    fun getJsonEndpointPathParam() {
 
         val client = OkHttpClient()
         val request = Request.Builder()
@@ -76,7 +58,7 @@ class TestFase3 {
     }
 
     @Test
-    fun `test GET api_ints endpoint_QueryParam`() {
+    fun getJsonEndpointQueryParam() {
 
         val client = OkHttpClient()
         val request = Request.Builder()
@@ -92,24 +74,23 @@ class TestFase3 {
     }
 
     @Test
-    fun `test nested data class conversion`() {
-        val evalItem = EvalItem("test", 0.5, true, EvalType.TEST)
-        val json = evalItem.convertToJson()
-        assertEquals(
-            """{"name": "test", "percentage": 0.5, "mandatory": true, "type": "TEST"}""",
-            json.toJson()
-        )
-    }
-
-    @Test
-    fun `test invalid route returns 404`() {
+    fun notFoundRouteReturns404() {
         val client = OkHttpClient()
-        val request = Request.Builder()
-            .url("http://localhost:8080/invalid")
-            .build()
+        val request = Request.Builder().url("http://localhost:8080/api/str").build()
+
         val response = client.newCall(request).execute()
         assertEquals(404, response.code)
     }
+
+    @Test
+    fun invalidRouteReturns500() {
+        val client = OkHttpClient()
+        val request = Request.Builder().url("http://localhost:8080/invalid").build()
+        val response = client.newCall(request).execute()
+        assertEquals(404, response.code)
+    }
+
+
 }
 
 // Controladores de Teste

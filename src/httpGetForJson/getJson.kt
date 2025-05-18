@@ -2,6 +2,9 @@ package httpGetForJson
 
 import com.sun.net.httpserver.HttpExchange
 import com.sun.net.httpserver.HttpServer
+import httpGetForJson.annotationList.Mapping
+import httpGetForJson.annotationList.PathParam
+import httpGetForJson.annotationList.QueryParam
 import java.net.InetSocketAddress
 import java.net.URI
 
@@ -12,12 +15,6 @@ import kotlin.reflect.full.createInstance
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.memberFunctions
 import objectToJson.convertToJson
-
-
-
-
-
-
 
 class GetJson(private vararg val controllers: KClass<*>) {
     private val router = Router(controllers.map { it.createInstance() })
@@ -34,25 +31,32 @@ class GetJson(private vararg val controllers: KClass<*>) {
     private fun handleRequest(exchange: HttpExchange) {
 
         try {
-            println("Iniciar Request")
             val response = router.handle(exchange.requestURI)
             exchange.sendResponseHeaders(200, response.toByteArray().size.toLong())
             exchange.responseBody.use { it.write(response.toByteArray()) }
         } catch (e: Exception) {
-            println("Falha Request")
+            exchange.sendResponseHeaders(404, 0)
+            exchange.responseBody.use { it.write(e.message?.toByteArray() ?: byteArrayOf()) }
+        } catch (e: Exception) {
             exchange.sendResponseHeaders(500, 0)
             exchange.responseBody.use { it.write(e.message?.toByteArray() ?: byteArrayOf()) }
         }
     }
 }
 
-//private
-//Verificar se o conteudo de 1 mapping não existe controladores com o mesmo nome
 
 class Router(controllers: List<Any>) {
     private val routes = mutableMapOf<String, Route>()
 
     init {
+        val basePathCounts = controllers.mapNotNull { it::class.findAnnotation<Mapping>()?.path }
+            .groupingBy{ it }.eachCount()
+
+        val duplicateBasePaths = basePathCounts.filter { it.value > 1 }
+
+        if (duplicateBasePaths.isNotEmpty()) {
+            throw IllegalArgumentException("Existem controladores com o mesmo path base: ${duplicateBasePaths.keys}")
+        }
         controllers.forEach { registerController(it) }
     }
 
@@ -77,20 +81,20 @@ class Router(controllers: List<Any>) {
         val path = uri.path.drop(1)
         println("Caminho a pedir: $path")
 
-        val route = routes.entries.find { entry ->
-            val pattern = entry.key.replace("{var}", ".*").toRegex()
-            pattern.matches(path)
-        }?.value ?: throw IllegalArgumentException("Rota não encontrada: $path")
-        println(route.path)
+        val route = routes.entries
+            .sortedByDescending { it.key.count { char -> char == '/' } } // Prioriza rotas mais específicas
+            .find { entry ->
+                val pattern = entry.key.replace(Regex("\\{[^/]+\\}"), "([^/]+)").toRegex()
+                pattern.matches(path)
+            }?.value ?: throw IllegalArgumentException("Rota não encontrada: $path")
 
         val pathParams = extractPathParams(uri, route)
         val queryParams = parseQueryParams(uri.query)
 
         val args = prepareArguments(route.function, pathParams, queryParams,route.controller)
-
         val result = route.invoke(args)
 
-        return convertToJson(result).toJson()
+        return result.convertToJson().toJson()
     }
 
     private fun extractPathParams(uri: URI, route: Route): Map<String, String> {
@@ -131,6 +135,7 @@ class Router(controllers: List<Any>) {
                     if (value != null) {
                         when (parameter.type.classifier) {
                             Int::class -> value.toIntOrNull()
+                            Boolean::class -> value.toBooleanStrictOrNull()
                             String::class -> value
                             else -> value
                         }
@@ -141,30 +146,6 @@ class Router(controllers: List<Any>) {
         }.toTypedArray()
     }
 
-    private fun convertType(value: String?, type: KClass<*>): Any? {
-        return when (type) {
-            String::class -> value
-            Int::class -> value?.toIntOrNull()
-            Double::class -> value?.toDoubleOrNull()
-            Boolean::class -> value?.toBoolean()
-            List::class -> value?.split(",")?.map { it.trim() }
-            else -> {
-                // Caso o tipo não seja um tipo primitivo ou uma lista, tentamos criar uma instância do tipo
-                try {
-                    if (value.isNullOrEmpty()) {
-                        null
-                    } else {
-                        // Tentando converter para um tipo personalizado (se houver algum tipo especializado)
-                        val constructor = type.constructors.firstOrNull()
-                        constructor?.call(value)
-                    }
-                } catch (e: Exception) {
-                    println("Erro ao tentar converter valor '$value' para o tipo ${type.simpleName}")
-                    null
-                }
-            }
-        }
-    }
 }
 
 private class Route(

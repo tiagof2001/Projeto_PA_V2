@@ -1,6 +1,6 @@
 import jsonAlternative.*
 import junit.framework.TestCase.assertEquals
-import objectToJson.convertToJson
+import objectToJson.*
 import org.junit.Test
 
 data class Course(
@@ -71,42 +71,21 @@ class TestFase2{
             EvalItem("quizzes", .2, false, null),
             EvalItem("project", .8, true, EvalType.PROJECT))
         )
-        println(course.convertToJson().toJson())
+        //println(course.convertToJson().toJson())
     }
 
     @Test
     fun pairToJson(){
-        val pair: Pair<String, String> = Pair("um", "dois")
+        val pair: Pair<*, *> = Pair("um", "dois")
         val person = JsonObject(
             listOf(
                 "first" to JsonString("um"),
                 "second" to JsonString("dois")
             )
         )
-        println(pair.convertToJson().toJson())
+        //println(pair.convertToJson().toJson())
         assertEquals(pair.convertToJson().toJson(), person.toJson())
 
     }
-    /**
-     * {
-     *  "credits": 6,
-     *  "evaluation": [
-     *      {
-     *          "mandatory": false,
-     *          "name": "quizzes",
-     *          "percentage": 0.2,
-     *          "type": null
-     *      },
-     *      {
-     *          "mandatory": true,
-     *          "name": "project",
-     *          "percentage": 0.8,
-     *          "type": "PROJECT"
-     *       }
-     *       ],
-     *  "name": "PA"
-     * }
-     *
-     */
 
 }
