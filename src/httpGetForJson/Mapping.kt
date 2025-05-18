@@ -1,6 +1,4 @@
 package httpGetForJson
 
-@Target(AnnotationTarget.FUNCTION, AnnotationTarget.CLASS)
-annotation class Mapping(
-    val url: String
-)
+@Target(AnnotationTarget.CLASS,AnnotationTarget.FUNCTION,AnnotationTarget.VALUE_PARAMETER)
+annotation class Mapping(val path: String = "")

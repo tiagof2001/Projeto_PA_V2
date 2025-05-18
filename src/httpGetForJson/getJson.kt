@@ -1,4 +1,4 @@
-package jsonAlternative
+package httpGetForJson
 
 import com.sun.net.httpserver.HttpExchange
 import com.sun.net.httpserver.HttpServer
@@ -11,17 +11,13 @@ import kotlin.reflect.KParameter
 import kotlin.reflect.full.createInstance
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.memberFunctions
-import jsonAlternative.convertToJson
-import kotlin.reflect.full.instanceParameter
+import objectToJson.convertToJson
 
-@Target(AnnotationTarget.CLASS,AnnotationTarget.FUNCTION,AnnotationTarget.VALUE_PARAMETER)
-annotation class Mapping(val path: String = "")
 
-@Target(AnnotationTarget.VALUE_PARAMETER)
-annotation class PathParam(val name: String = "")
 
-@Target(AnnotationTarget.VALUE_PARAMETER)
-annotation class QueryParam(val name: String = "")
+
+
+
 
 class GetJson(private vararg val controllers: KClass<*>) {
     private val router = Router(controllers.map { it.createInstance() })

@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import jsonAlternative.*
-import java.net.URI
+import objectToJson.convertToJson
 import kotlin.collections.List
 
 class TestFase3 {
@@ -46,7 +46,7 @@ class TestFase3 {
     @Test
     fun `test convert data class to JSON`() {
         val course = Course("PA", 6, emptyList())
-        val json = convertToJson(course)
+        val json = course.convertToJson()
         assertTrue(json is JsonObject)
         assertEquals("""{"name": "PA", "credits": 6, "evaluation": []}""", json.toJson())
     }
@@ -87,14 +87,14 @@ class TestFase3 {
         val result = TestController()
 
         assertEquals(
-            convertToJson(result.args(3,"PA")).toJson(),
+            (result.args(3,"PA")).convertToJson().toJson(),
             response.body?.string())
     }
 
     @Test
     fun `test nested data class conversion`() {
         val evalItem = EvalItem("test", 0.5, true, EvalType.TEST)
-        val json = _root_ide_package_.jsonAlternative.convertToJson(evalItem)
+        val json = evalItem.convertToJson()
         assertEquals(
             """{"name": "test", "percentage": 0.5, "mandatory": true, "type": "TEST"}""",
             json.toJson()
