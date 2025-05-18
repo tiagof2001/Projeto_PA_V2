@@ -1,10 +1,10 @@
-import convertToJson.*
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
+import jsonAlternative.*
 import kotlin.collections.List
 
 import httpGetForJson.annotationList.*
@@ -12,18 +12,15 @@ import httpGetForJson.GetJson
 
 class TestFase3 {
 
-
     companion object {
         private lateinit var server: GetJson
-        private val objectToJson = ExtendedJsonConverter(DefaultJsonConverter())
 
         @BeforeAll
         @JvmStatic
         fun setup() {
             server = GetJson(
                 TestController::class,
-                CourseController::class,
-                convertion = objectToJson
+                CourseController::class
             )
             server.start(8080)
         }
@@ -42,7 +39,7 @@ class TestFase3 {
     @Test
     fun checkControllerWithDoubleIdMapping() {
         assertThrows(IllegalArgumentException::class.java) {
-            val serverTest = GetJson(TestController::class, Controller::class,convertion = objectToJson)
+            val serverTest = GetJson(TestController::class, Controller::class)
             serverTest.start(8090)
         }
     }
@@ -54,13 +51,13 @@ class TestFase3 {
 
         val request = Request.Builder().url("http://localhost:8080/api/ints").build()
         val response = client.newCall(request).execute()
-        val result = objectToJson.objectToJson(TestController().getInts()).toJson()
+        val result = convertToJson(TestController().getInts()).toJson()
 
         assertEquals(result, response.body?.string())
 
         val request2 = Request.Builder().url("http://localhost:8080/courses/sample").build()
         val response2 = client.newCall(request2).execute()
-        val result2 = objectToJson.objectToJson(CourseController().getCourse()).toJson()
+        val result2 = convertToJson(CourseController().getCourse()).toJson()
 
         assertEquals(result2, response2.body?.string())
 
@@ -74,7 +71,7 @@ class TestFase3 {
         val request = Request.Builder().url("http://localhost:8080/api/path/a").build()
         val response = client.newCall(request).execute()
 
-        val result = objectToJson.objectToJson(TestController().getPath("a")).toJson()
+        val result = convertToJson(TestController().getPath("a")).toJson()
 
         assertEquals(result, response.body?.string())
     }
@@ -86,12 +83,12 @@ class TestFase3 {
         val request = Request.Builder().url("http://localhost:8080/api/args?n=3&text=PA").build()
         val response = client.newCall(request).execute()
 
-        val result = objectToJson.objectToJson(TestController().args(3,"PA")).toJson()
+        val result = convertToJson(TestController().args(3,"PA")).toJson()
         assertEquals( result, response.body?.string())
     }
 
     @Test
-    fun notFoundRouteReturns404() {
+    fun invalidRouteReturns404() {
         val client = OkHttpClient()
         val request = Request.Builder().url("http://localhost:8080/api/test").build()
         val response = client.newCall(request).execute()
