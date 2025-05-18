@@ -99,6 +99,9 @@ class TestController {
     @Mapping("ints")
     fun getInts() : List<Int> = listOf(1, 2, 3)
 
+    @Mapping("pair")
+    fun obj(): Pair<String, String> = Pair("um", "dois")
+
     @Mapping("path/{var}")
     fun getPath(@PathParam("var") param: String) = param.uppercase()
 

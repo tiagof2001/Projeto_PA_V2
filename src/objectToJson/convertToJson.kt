@@ -37,7 +37,6 @@ fun Any?.convertToJson() : JsonValue = when(this) {
                 if (key is String) {
                     conversion = conversion + listOf(key to value.convertToJson())
                 }
-                //Criar caso Key não seja string
             }
             JsonObject(conversion)
         }
@@ -57,6 +56,7 @@ fun Any?.convertToJson() : JsonValue = when(this) {
         }
 //        else -> throw IllegalArgumentException("Não existe conversão para json com o valor recebido")
 }
+
 
 fun Pair<*, *>.convertToJson() : JsonValue {
 
