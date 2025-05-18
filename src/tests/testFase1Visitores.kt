@@ -28,7 +28,7 @@ class TestFase1Visitores(){
     }
 
     @Test
-    fun arraysIsSameType(){
+    fun visitorArraysHaveSameType(){
         val json2 = JsonArray(listOf(
             JsonArray(listOf(JsonNumber(1),JsonNumber(2))),
             JsonArray(listOf(JsonNumber(1),JsonNumber(2))),
@@ -39,6 +39,13 @@ class TestFase1Visitores(){
         val typeVisitor = VisitorArrayElementsSameType()
         json2.accept(typeVisitor)
         assertEquals(true,typeVisitor.getIsSameType())
+
+        //Possivel erro, conteudo do JsonString("1") == JsonNumber(1)
+        val json3 = JsonArray(listOf(
+            JsonArray(listOf(JsonString("A"),JsonNumber(2))),
+            JsonArray(listOf(JsonNumber(1),JsonNumber(2))),
+            JsonArray(listOf(JsonNumber(3),JsonNumber(4)))
+        ))
 
         json.accept(typeVisitor)
         assertEquals(false,typeVisitor.getIsSameType())

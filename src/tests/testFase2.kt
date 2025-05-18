@@ -53,11 +53,6 @@ class TestFase2{
         val resultMap = listOf<Pair<String, JsonValue>>("teste1" to JsonNumber(10), "teste2" to JsonNumber(20))
         assertEquals(testMap.convertToJson().toJson(), JsonObject(resultMap).toJson())
 
-        /**
-         * val testMap = mapOf<String, Any?>( "teste1" to 10, "teste2" to 20 )
-         *         val resultMap = mapOf<String, JsonValue>("teste1" to JsonNumber(10), "teste2" to JsonNumber(20))
-         *         assertEquals(testMap.convertToJson().toJson(), JsonObject(resultMap).toJson())
-         */
     }
 
     @Test
@@ -75,11 +70,31 @@ class TestFase2{
 
     @Test
     fun dataToJson(){
-//        val course = tests.Course("PA", 6, listOf(
-//            tests.EvalItem("quizzes", .2, false, null),
-//            tests.EvalItem("project", .8, true, tests.EvalType.PROJECT))
-//        )
-        //println(course.convertToJson().toJson())
+        val course = Course("PA", 6, listOf(
+            EvalItem("quizzes", .2, false, null),
+            EvalItem("project", .8, true, EvalType.PROJECT))
+        )
+
+        val courseResult = JsonObject(listOf(
+            "name" to JsonString("PA"),
+            "credits" to JsonNumber(6),
+            "evaluation" to JsonArray(listOf(
+                JsonObject(listOf(
+                    "name" to JsonString("quizzes"),
+                    "percentage" to JsonNumber(.2),
+                    "mandatory" to JsonBoolean(false),
+                    "type" to JsonNull
+                )),
+                JsonObject(listOf(
+                    "name" to JsonString("project"),
+                    "percentage" to JsonNumber(.8),
+                    "mandatory" to JsonBoolean(true),
+                    "type" to JsonString(EvalType.PROJECT.toString())
+                ))
+            ))
+        ))
+
+        assertEquals(course.convertToJson().toJson(), courseResult.toJson())
     }
 
     @Test
@@ -91,9 +106,6 @@ class TestFase2{
                 "second" to JsonString("dois")
             )
         )
-        //println(pair.convertToJson().toJson())
         assertEquals(pair.convertToJson().toJson(), person.toJson())
-
     }
-
 }

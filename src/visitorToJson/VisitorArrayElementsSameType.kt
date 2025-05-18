@@ -45,13 +45,36 @@ class VisitorArrayElementsSameType : JsonVisitor {
      */
 
     override fun visitorArray(array: JsonArray) {
-        val elements = array.getValues().filter { it != JsonNull }
-        if (elements.isNotEmpty()) {
-            isSameType = elements.all { it::class == elements.first()::class }
+        if (!isSameType) return // Já invalidado, não precisa continuar
+
+        val values = array.getValues().filter { it !is JsonNull }
+
+        if (values.isNotEmpty()) {
+            val firstType = values[0]::class
+            // Verifica se todos os elementos têm o mesmo tipo
+            val allSameType = values.all { it::class == firstType }
+            if (!allSameType) {
+                isSameType = false
+                return
+            }
+        }
+
+        // Continua a visita nos elementos do array
+        for (value in values) {
+            value.accept(this)
         }
     }
 
-    override fun visitorObject(obj: JsonObject) {}
+    override fun visitorObject(obj: JsonObject) {
+        if (!isSameType) return // Se já invalidado, pode parar
+
+        // Percorre todos os membros do JsonObject
+        for ((_, value) in obj.getMembers()) {
+            value.accept(this)
+            if (!isSameType) return
+        }
+    }
+
     override fun visitorString(str: JsonString) {}
     override fun visitorNumber(num: JsonNumber) {}
     override fun visitorBoolean(bool: JsonBoolean) {}

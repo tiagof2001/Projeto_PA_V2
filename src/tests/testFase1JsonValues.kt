@@ -1,11 +1,6 @@
 package tests
 
-import jsonAlternative.JsonArray
-import jsonAlternative.JsonBoolean
-import jsonAlternative.JsonNull
-import jsonAlternative.JsonNumber
-import jsonAlternative.JsonObject
-import jsonAlternative.JsonString
+import jsonAlternative.*
 import junit.framework.TestCase.assertEquals
 import org.junit.Test
 

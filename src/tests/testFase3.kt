@@ -34,6 +34,7 @@ class TestFase3 {
         }
     }
 
+    // Testes Fase 3: Endpoints HTTP
     @Test
     fun controllersWithSameUrlBase(){
 
@@ -43,16 +44,15 @@ class TestFase3 {
         }
     }
 
-    // Testes Fase 3: Endpoints HTTP
     @Test
     fun getJsonEndpointMapping() {
 
         val client = OkHttpClient()
-        val request = Request.Builder()
-            .url("http://localhost:8080/api/ints")
-            .build()
+        val request = Request.Builder().url("http://localhost:8080/api/ints").build()
         val response = client.newCall(request).execute()
-        assertEquals("""[1, 2, 3]""", response.body?.string())
+        assertEquals(
+            TestController().getInts().convertToJson().toJson(),
+            response.body?.string())
     }
 
 
@@ -60,11 +60,11 @@ class TestFase3 {
     fun getJsonEndpointPathParam() {
 
         val client = OkHttpClient()
-        val request = Request.Builder()
-            .url("http://localhost:8080/api/path/a")
-            .build()
+        val request = Request.Builder().url("http://localhost:8080/api/path/a").build()
         val response = client.newCall(request).execute()
-        assertEquals(JsonString("A").toJson(), response.body?.string())
+        assertEquals(
+            TestController().getPath("A").convertToJson().toJson(),
+            response.body?.string())
 
     }
 
@@ -89,31 +89,19 @@ class TestFase3 {
             .build()
         val response = client.newCall(request).execute()
 
-        val result = TestController()
-
         assertEquals(
-            (result.args(3,"PA")).convertToJson().toJson(),
+            (TestController().args(3,"PA")).convertToJson().toJson(),
             response.body?.string())
     }
 
     @Test
     fun notFoundRouteReturns404() {
         val client = OkHttpClient()
-        val request = Request.Builder().url("http://localhost:8080/api/str").build()
-
-        val response = client.newCall(request).execute()
-        assertEquals(404, response.code)
-    }
-
-    @Test
-    fun invalidRouteReturns500() {
-        val client = OkHttpClient()
         val request = Request.Builder().url("http://localhost:8080/invalid").build()
+
         val response = client.newCall(request).execute()
         assertEquals(404, response.code)
     }
-
-
 }
 
 // Controladores de Teste

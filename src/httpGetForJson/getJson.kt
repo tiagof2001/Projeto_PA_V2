@@ -75,7 +75,7 @@ class GetJson(private vararg val controllers: KClass<*>) {
      * Este método processa o URI contido no pedido utilizando o router para determinar
      * a resposta apropriada. Em caso de sucesso, é enviado um código de estado HTTP 200 juntamente
      * com o conteúdo da resposta. Se for lançada uma exceção durante o processamento do URI,
-     * responde com um código de estado 404 ou 500 e a mensagem da exceção.
+     * responde com um código de estado 404 e a mensagem da exceção.
      *
      * @param exchange O objeto HTTP exchange que contém os detalhes do pedido e da resposta.
      */
@@ -89,9 +89,6 @@ class GetJson(private vararg val controllers: KClass<*>) {
             exchange.responseBody.use { it.write(response.toByteArray()) }
         } catch (e: Exception) {
             exchange.sendResponseHeaders(404, 0)
-            exchange.responseBody.use { it.write(e.message?.toByteArray() ?: byteArrayOf()) }
-        } catch (e: Exception) {
-            exchange.sendResponseHeaders(500, 0)
             exchange.responseBody.use { it.write(e.message?.toByteArray() ?: byteArrayOf()) }
         }
     }
