@@ -1,3 +1,5 @@
+package tests
+
 import jsonAlternative.JsonArray
 import jsonAlternative.JsonBoolean
 import jsonAlternative.JsonNull

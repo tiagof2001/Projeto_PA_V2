@@ -3,17 +3,6 @@ package jsonAlternative
 import visitorToJson.JsonVisitor
 
 /**
- *  Os objetos são especificados entre chaves e podem ser compostos por múltiplos pares nome/valor,
- *  desde que as chaves sejam distintas
- *  {
- *   “titulo”: “JSON x XML”,
- *   “resumo”: “o duelo de dois modelos de representação de informações”,
- *   “ano”: 2012,
- *   “genero”: [“aventura”, “ação”, “ficção”]
- *  }
- */
-
-/**
  * Representa um objeto JSON como uma coleção de pares chave-valor, onde cada chave é única e associada a um valor do tipo `JsonValue`.
  * Permite operações como filtragem, serialização para string JSON e aceitação de visitors para processamento personalizado.
  *
