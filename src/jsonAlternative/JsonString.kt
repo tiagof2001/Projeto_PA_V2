@@ -15,6 +15,12 @@ class JsonString(private var value: String) : JsonValue{
      *         devidamente codificado e entre aspas duplas.
      */
 
+    init {
+        if(value.matches(Regex("-?\\d+(\\.\\d+)?"))){
+            throw NumberFormatException("$value é um número, adicionar um caractere ao $value ou usa a classe JsonNumber")
+        }
+    }
+
     override fun toJson(): String = "\"${value}\""
 
     /**
