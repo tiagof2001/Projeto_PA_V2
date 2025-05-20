@@ -25,8 +25,8 @@ Instruções para utilizar as classes de conversão para JSON:
 3. class JsonBoolean(val value = boolean): JsonValue -> Criar uma representação de JSON para valores do tipo boolean
 4. class JsonString(val value = string): JsonValue -> Criar uma representação de JSON para valores do tipo string
    Excepções -> Não irá criar, se o conteúdo da value tiver só valores númericos
-6. class JsonArray(val value = List<JsonValue>): JsonValue -> Criar uma representação de JSON para uma lista de valores do tipo JsonValue
-7. class JsonObject(val value = List<Pair<String, JsonValue>>): JsonValue -> Criar uma representação de JSON para uma lista de pares de um tipo JsonValue, associados à uma key
+5. class JsonArray(val value = List<JsonValue>): JsonValue -> Criar uma representação de JSON para uma lista de valores do tipo JsonValue
+6. class JsonObject(val value = List<Pair<String, JsonValue>>): JsonValue -> Criar uma representação de JSON para uma lista de pares de um tipo JsonValue, associados à uma key
 
 Manipulação Avançada de JSON:
 -
@@ -87,11 +87,11 @@ Exemplos de Conversão
   - val jsonNumber = 42.convertToJson()
   - println(jsonNumber.toJson())  // Saída: 42
 
-6. Converter uma lista para JSON:
+5. Converter uma lista para JSON:
    - val jsonArray = listOf("A", "B", "C").convertToJson()
    - println(jsonArray.toJson())  // Saída: ["A", "B", "C"]
 
-7. Converter uma lista de pares<String, *> para JSON:
+6. Converter uma lista de pares<String, *> para JSON:
    - val jsonlist = listOf("chave1" to "valor1", "chave2" to 2).convertToJson()
    - println(jsonlist.toJson())  // Saída: {"chave1": "valor1", "chave2": 2}
 
