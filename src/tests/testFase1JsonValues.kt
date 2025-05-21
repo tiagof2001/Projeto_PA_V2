@@ -4,7 +4,7 @@ import jsonAlternative.*
 import junit.framework.TestCase.assertEquals
 import org.junit.Test
 
-class TestFase2JsonValues {
+class TestFase1JsonValues {
 
     @Test
     fun intTojson() {
@@ -53,12 +53,12 @@ class TestFase2JsonValues {
 
         jsonTest = JsonArray(
             listOf(
-                JsonString("10"),
-                JsonString("20"),
-                JsonString("30")
+                JsonString("10A"),
+                JsonString("20A"),
+                JsonString("30A")
             )
         )
-        assertEquals(jsonTest.toJson(), "[\"10\", \"20\", \"30\"]")
+        assertEquals(jsonTest.toJson(), "[\"10A\", \"20A\", \"30A\"]")
 
         jsonTest = JsonArray(
             listOf(
@@ -71,13 +71,13 @@ class TestFase2JsonValues {
         jsonTest = JsonArray(
             listOf(
                 JsonNumber(10),
-                JsonString("20"),
+                JsonString("20A"),
                 JsonBoolean(true),
                 JsonBoolean(false),
                 JsonNull
             )
         )
-        assertEquals(jsonTest.toJson(), "[10, \"20\", true, false, null]")
+        assertEquals(jsonTest.toJson(), "[10, \"20A\", true, false, null]")
     }
 
     @Test
@@ -109,7 +109,7 @@ class TestFase2JsonValues {
                 "name" to JsonString("Alice"),
                 "age" to JsonNumber(30),
                 "isStudent" to JsonBoolean(true),
-                "hobbies" to JsonArray(listOf(JsonString("reading"), JsonString("reading"))),
+                "hobbies" to JsonArray(listOf(JsonString("not reading"), JsonString("reading"))),
                 "address" to JsonNull
             )
         )
@@ -120,6 +120,17 @@ class TestFase2JsonValues {
         val filterNumber = testjson.filter { it.second::class == JsonNumber::class }
         val filterNumberResult = JsonObject(listOf( "age" to JsonNumber(30)))
         assertEquals(filterNumber.toJson(),filterNumberResult.toJson())
+
+        val filterArray = testjson.filter { it.second is JsonArray }
+        val hobbiesArray = (filterArray.getJsonValue("hobbies") as JsonArray)
+        println(hobbiesArray.toJson())
+        val readingOnly = hobbiesArray.filter {
+            it is JsonString && it.toJson() == JsonString("reading").toJson()
+        }
+
+        val expectedReadingOnly = JsonArray(listOf(JsonString("reading")))
+        assertEquals(expectedReadingOnly.toJson(), readingOnly.toJson())
+
     }
 
     @Test
@@ -153,6 +164,22 @@ class TestFase2JsonValues {
             JsonNumber(20),
             JsonNumber(30)))
         assertEquals(mapped.toJson(), mappedResult.toJson())
+    }
+
+    @Test
+    fun testGetJsonValueFromJsonArray() {
+        val jsonArray = JsonArray(
+            listOf(
+                JsonString("item1"),
+                JsonNumber(42),
+                JsonBoolean(false)
+            )
+        )
+
+        // Teste com índices válidos
+        assertEquals(JsonString("item1").toJson(), jsonArray.getJsonValue(0).toJson())
+        assertEquals(JsonNumber(42).toJson(), jsonArray.getJsonValue(1).toJson())
+        assertEquals(JsonBoolean(false).toJson(), jsonArray.getJsonValue(2).toJson())
     }
 
 }

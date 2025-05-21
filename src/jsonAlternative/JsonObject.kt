@@ -28,6 +28,19 @@ class JsonObject(private val members: List<Pair<String, JsonValue>>) : JsonValue
     }
 
     /**
+     * Obtém o conteúdo que está associado a uma key
+     *
+     * @return Retorna um objeto do tipo JsonValue
+     *
+     * @exception NoSuchElementException Caso não exista uma key com esse conteúdo
+     */
+    fun getJsonValue(key: String): JsonValue {
+        return members.firstOrNull { it.first == key }
+            ?.second
+            ?: throw NoSuchElementException("A chave '$key' não existe no JsonObject.")
+    }
+
+    /**
      * Filtra os membros do JsonObject com base num predicado fornecido.
      *
      * @param predicate Uma função que determina se um par chave-valor (do tipo Pair<String, JsonValue>)

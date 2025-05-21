@@ -20,6 +20,20 @@ import visitorToJson.JsonVisitor
 class JsonArray(private var value: List<JsonValue>) : JsonValue {
 
     /**
+     * Obtém o conteúdo do JsonArray de um certo índice
+     *
+     * @return JsonValue associado ao índice
+     *
+     * @exception IndexOutOfBoundsException Caso o índice esteja fora dos limites do JsonArray
+     */
+    fun getJsonValue(index: Int): JsonValue {
+        if (index < 0 || index >= value.size) {
+            throw IndexOutOfBoundsException("Índice $index está fora dos limites do JsonArray (tamanho: ${value.size}).")
+        }
+        return value[index]
+    }
+
+    /**
      * Filtra os elementos do JsonArray baseado nos critérios estabelecidos.
      *
      * @param predicate Uma função que recebe um JsonValue e devolve um boolean.
