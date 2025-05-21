@@ -124,4 +124,8 @@ Iniciar o servidor
 fun main() {
 val app = GetJson(Controller::class)
 
+Diagrama UML
+-
+![Diagrama UML](https://github.com/user-attachments/assets/9ddf5d08-9954-473d-9eb9-9f0ac2f5aeae)
+
 
