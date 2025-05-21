@@ -95,14 +95,15 @@ class GetJson(private vararg val controllers: KClass<*>) {
 }
 
 /**
- * A class responsible for managing and handling routing logic by mapping URI paths
- * to their respective controller methods. It enables the invocation of appropriate
- * controller functions based on the requested URI.
+ * Classe responsável por gerir e processar a lógica de routing, mapeando caminhos URI
+ * para os respetivos métodos dos controladores. Permite a invocação das funções
+ * de controlador apropriadas com base no URI solicitado.
  *
- * @param controllers A list of controller instances, each annotated with a base path
- * using the `@Mapping` annotation. Each controller is processed to register its methods
- * as routes.
+ * @param controllers Uma lista de instâncias de controladores, cada uma anotada com um caminho base
+ * através da anotação `@Mapping`. Cada controlador é processado para registar os seus métodos
+ * como rotas.
  */
+
 
 
 class Router(controllers: List<Any>) {
